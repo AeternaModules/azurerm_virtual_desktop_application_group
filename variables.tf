@@ -25,30 +25,6 @@ EOT
     friendly_name                = optional(string)
     tags                         = optional(map(string))
   }))
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_desktop_application_groups : (
-        v.friendly_name == null || (length(v.friendly_name) >= 1 && length(v.friendly_name) <= 64)
-      )
-    ])
-    error_message = "must be between 1 and 64 characters"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_desktop_application_groups : (
-        v.default_desktop_display_name == null || (length(v.default_desktop_display_name) > 0)
-      )
-    ])
-    error_message = "must not be empty"
-  }
-  validation {
-    condition = alltrue([
-      for k, v in var.virtual_desktop_application_groups : (
-        v.description == null || (length(v.description) >= 1 && length(v.description) <= 512)
-      )
-    ])
-    error_message = "must be between 1 and 512 characters"
-  }
   # --- Unconfirmed validation candidates, derived from azurerm_virtual_desktop_application_group's provider source ---
   # Not auto-enabled: either a bespoke provider validator we can't safely translate,
   # or a path that crosses a list-typed block (needs its own for_each wrapping).
@@ -89,6 +65,15 @@ EOT
   #   source:    [from hostpool.ValidateHostPoolID] !ok
   # path: host_pool_id
   #   source:    [from hostpool.ValidateHostPoolID] err != nil
+  # path: friendly_name
+  #   condition: length(value) >= 1 && length(value) <= 64
+  #   message:   must be between 1 and 64 characters
+  # path: default_desktop_display_name
+  #   condition: length(value) > 0
+  #   message:   must not be empty
+  # path: description
+  #   condition: length(value) >= 1 && length(value) <= 512
+  #   message:   must be between 1 and 512 characters
   # path: tags
   #   condition: length(value) <= 50
   #   message:   [from tags.Validate: invalid when len(value) > 50]
